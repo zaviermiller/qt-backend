@@ -6,11 +6,22 @@ import (
 	"os"
 	"github.com/joho/godotenv"
 	"fmt"
+	"time"
 )
+
+// Custom Base Model with appropriately named JSON fields
+type QTModel struct {
+	ID uint `gorm:"primary_key" json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	DeletedAt *time.Time `json:"deletedAt"`
+}
 
 var db *gorm.DB
 
 func init() {
+
+	fmt.Println("[*] Initializing database...")
 
 	e := godotenv.Load()
 
@@ -32,7 +43,8 @@ func init() {
 	}
 
 	db = conn
-	db.Debug().AutoMigrate(&User{})
+	fmt.Println("[*] Database online")
+	db.Debug().AutoMigrate(&User{}, &Test{}, &Section{})
 
 }
 

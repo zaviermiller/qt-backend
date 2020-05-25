@@ -12,23 +12,42 @@ var CreateUser = func(w http.ResponseWriter, r *http.Request) {
 	user := &models.User{}
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
-		u.Respond(w, u.Message(false, "Invalid request"))
+		u.Error(w, 400, "Bad Request")
 		return
 	}
 
-	response := user.Create()
-	u.Respond(w, response)
+	_, err = user.Create()
+	if err != nil {
+		u.Error(w, 500, err.Error())
+	}
+	u.Respond(w, 200, "")
+
 }
 
 var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 
-	user := models.User{}
+	user := &models.User{}
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
-		u.Respond(w, u.Message(false, "Invalid request"))
+		u.Error(w, 400, "Bad Request")
 		return
 	}
 
-	response := models.Login(user.Email, user.Password)
-	u.Respond(w, response)
+	token, err := models.Login(user.Email, user.Password)
+	
+	if err != nil {
+		u.Error(w,500, err.Error())
+	}
+
+	u.Respond(w, 200, map[string]interface{}{"token": token})
+
+}
+
+var ConfirmUser = func(w http.ResponseWriter, r *http.Request) {
+
+	userId := r.Context().Value("userId") . (uint)
+	user := *models.GetUser(userId)
+
+	u.Respond(w, 200, map[string]interface{}{"user":user})
+
 }
